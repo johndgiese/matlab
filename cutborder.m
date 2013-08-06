@@ -1,3 +1,5 @@
-function img2 = cutborder(img, pixels)
-    img2 = img(pixels:end-pixels, pixels:end-pixels);
+function cropped_img = cutborder(img, pixels)
+    %CUTBORDER Cut the outer pixels from an image.
+    
+    cropped_img = img(pixels:end-pixels, pixels:end-pixels);
 end
