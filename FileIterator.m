@@ -12,12 +12,12 @@ classdef FileIterator < handle
     %           img = imread(imgs.next());
     %       end
 
-    properties (Hidden)
+    properties (Hidden, SetAccess = protected)
         current = 1;
         filenames = {};
     end
 
-    properties (SetAccess = private)
+    properties (SetAccess = protected)
         length = 0;
     end
 

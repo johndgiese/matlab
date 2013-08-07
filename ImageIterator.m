@@ -13,6 +13,10 @@ classdef ImageIterator < FileIterator
     %       end
 
     methods
+        function obj = ImageIterator(folder, glob)
+            obj = obj@FileIterator(folder, glob);            
+        end
+        
         function img = next(self)
             if ~self.more()
                 img = [];
