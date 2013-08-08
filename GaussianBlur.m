@@ -22,7 +22,7 @@ classdef GaussianBlur
 
     methods
         function obj = GaussianBlur(sigma, img_size)
-            % GaussianBlur Create Gaussian Blur filter object
+            %GAUSSIANBLUR Create Gaussian Blur filter object.
 
             obj.img_size = img_size;
             obj.padded_size = 2*img_size - 1;            
@@ -31,7 +31,7 @@ classdef GaussianBlur
         end
 
         function filtered_img = apply(obj, img)
-            % APPLY Apply a gaussian blur to an image.
+            %APPLY Apply a gaussian blur to an image.
             img_ft = fft2(img, obj.padded_size(1), obj.padded_size(2));
             filtered_img_padded = ifft2(img_ft.*obj.kernel_ft);
             filtered_img = filtered_img_padded(1:obj.img_size(1), 1:obj.img_size(2));

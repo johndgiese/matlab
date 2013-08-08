@@ -75,7 +75,7 @@ classdef VirtualImageStack < handle
         end
         
         function iterator = create_iterator(self)
-            glob = [self.basename, '*.', self.filetype];
+            glob = ['*.', self.filetype];
             iterator = ImageIterator(self.folder, glob);
         end
         
@@ -90,7 +90,7 @@ classdef VirtualImageStack < handle
     methods (Access = private)
         
         function iterator = create_file_iterator(self)           
-            glob = [self.basename, '*.', self.filetype];
+            glob = ['*.', self.filetype];
             iterator = FileIterator(self.folder, glob);
         end
 
