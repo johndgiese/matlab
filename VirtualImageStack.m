@@ -27,6 +27,8 @@ classdef VirtualImageStack < handle
         end
         
         function img_name = push(self, img)
+        %PUSH Add another image to the stack.
+        
             img_name = self.next_name();
             save_location = fullfile(self.folder, img_name);
             imwrite(img, save_location);
@@ -65,6 +67,44 @@ classdef VirtualImageStack < handle
                 movie(i) = im2frame(img, cmap);
             end            
         end
+        
+        function sum = sum(self, mask)
+        %SUM Sum all the images in the stack.
+        %
+        % Each images is cast to a double first to avoid overflow problems.
+        %
+        % There is an optional second argument, which is an array of
+        % integers which selects which images to sum over.
+        
+            imgs = self.create_iterator();            
+            
+            if ~mask
+                mask = 1:imgs.length;
+            end
+            
+            sum = double(imgs.next());
+            img_num = 1;
+            while(imgs.more())
+                img = double(imgs.next());
+                if ismember(img_num, mask)
+                    sum = sum + img;                    
+                end                                
+                img_num = img_num + 1;
+            end                        
+        end
+        
+        function mean = mean(self, mask)
+        %MEAN Mean of the images in the stack.
+        %
+        % Each images is cast to a double first to avoid overflow problems.
+        %
+        % There is an optional second argument, which is an array of
+        % integers which selects which images to sum over.
+        
+            num_imgs = self.create_iterator().length;
+            sum = self.sum(mask);
+            mean = sum/num_imgs;
+        end
 
         function reset(self)
             self.iterator = self.create_iterator();
@@ -83,6 +123,11 @@ classdef VirtualImageStack < handle
             first_img_name = self.create_file_iterator().next();
             info = imfinfo(first_img_name);
             bitdepth = info.BitDepth;
+        end
+        
+        function shape = size(self)
+            first_img = self.create_iterator().next();
+            shape = size(first_img);            
         end
     end
 

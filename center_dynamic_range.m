@@ -1,8 +1,8 @@
-function centered_img = center_dynamic_range(img)
+function centered_array = center_dynamic_range(array)
 %CENTER_DYNAMIC_RANGE Fix original zero at 0.5 and then fill to [0, 1].
 
-    img_min = min(img(:));
-    img_max = max(img(:));
-    scale = 2.0*max(abs(img_max), abs(img_min));    
-    centered_img = img/scale + 0.5;    
+    array_min = min(array(:));
+    array_max = max(array(:));
+    scale = 2.0*max(abs(array_max), abs(array_min));    
+    centered_array = array/scale + 0.5;    
 end
