@@ -78,7 +78,7 @@ classdef VirtualImageStack < handle
         
             imgs = self.create_iterator();            
             
-            if ~mask
+            if ~exist('mask', 'var')
                 mask = 1:imgs.length;
             end
             
@@ -100,8 +100,13 @@ classdef VirtualImageStack < handle
         %
         % There is an optional second argument, which is an array of
         % integers which selects which images to sum over.
+
+            num_imgs = self.length();
+
+            if ~exist('mask', 'var')
+                mask = 1:num_imgs;
+            end
         
-            num_imgs = self.create_iterator().length;
             sum = self.sum(mask);
             mean = sum/num_imgs;
         end
@@ -128,6 +133,10 @@ classdef VirtualImageStack < handle
         function shape = size(self)
             first_img = self.create_iterator().next();
             shape = size(first_img);            
+        end
+
+        function length = length(self)
+            length = self.create_iterator().next();
         end
     end
 
