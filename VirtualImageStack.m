@@ -136,7 +136,7 @@ classdef VirtualImageStack < handle
         end
 
         function length = length(self)
-            length = self.create_iterator().next();
+            length = self.create_iterator().length;
         end
     end
 
