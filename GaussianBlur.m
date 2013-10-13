@@ -1,4 +1,4 @@
-classdef GaussianBlur
+classdef GaussianBlur < ImageFilter
     % Gaussian Blur Class for efficiently blurring images.
     %
     % Filtering is done in the fourier domain.  The image and kernel are
@@ -21,7 +21,7 @@ classdef GaussianBlur
         calibration
         edges
     end
-    
+
     methods
         function obj = GaussianBlur(sigma, img_size, edges)
             %GAUSSIANBLUR Create Gaussian Blur filter object.
@@ -32,10 +32,9 @@ classdef GaussianBlur
 
             obj.img_size = img_size;
             obj.edges = edges;
-%             obj.padded_size = 2.^nextpow2(2*img_size - 1);
             obj.padded_size = 2*img_size - 1;
 
-            kernel = fftshift(fspecial('gaussian', obj.padded_size, sigma));            
+            kernel = fftshift(fspecial('gaussian', obj.padded_size, sigma));
             obj.kernel_ft = fft2(kernel);
 
             switch obj.edges
@@ -53,7 +52,7 @@ classdef GaussianBlur
             %APPLY Apply a gaussian blur to an image.
 
             % preprocess image
-            switch obj.edges                
+            switch obj.edges
                 case 'replicate'
                     img = repmat(img, 2, 2);
                 case 'reflect'
@@ -69,12 +68,14 @@ classdef GaussianBlur
             % postprocess image
             switch obj.edges
                 case 'smart'
-                    filtered_img = filtered_img.*obj.calibration;                    
+                    filtered_img = filtered_img.*obj.calibration;
             end
         end
-                
-    end
-    
+
+        function size = size(obj)
+            return obj.img_size;
+        end
+
     methods (Hidden)
         function filtered_img = fft_conv2(obj, img_ft, kernel_ft)
             filtered_img_padded = ifft2(img_ft.*kernel_ft);
