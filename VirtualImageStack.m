@@ -35,6 +35,21 @@ classdef VirtualImageStack < handle
             self.count = self.count + 1;
         end
         
+        function img_names = push3d(self, img_as_3d)
+        %PUSH3D Add a 3D array of images to the stack.
+        % Images are assumed to be indexed along the 3rd dimentions.
+        % E.g.
+        %     stack = VirtualImageStack('my/dir', 'png');
+        %     img_as_3d = ones(800, 600, 10);
+        %     stack.push3d(img_as_3d);
+        
+            [~, ~, nz] = size(img_as_3d);
+            img_names = cell(nz);
+            for img_count = 1:nz
+                img_names{nz} = self.push(img_as_3d(:, :, img_count));                
+            end        
+        end
+        
         function movie = movie(self, varargin)
         %MOVIE Generate an AVI movie from the virtual image stack. 
         %
