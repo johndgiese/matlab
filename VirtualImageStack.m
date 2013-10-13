@@ -4,15 +4,15 @@ classdef VirtualImageStack < handle
     %   Images are stored on disk; note all images are assumed to be the
     %   same size and have the same bitdepth.
     %
-    %   EXAMPLE:    
+    %   EXAMPLE:
     %       filetype = 'tiff';
     %       stack = ImageStack('my/directory', filetype);
     %
     %   NOTE: The stack assumes that all images in the specified folder starting
-    %   with basename should be processed as part of the stack.        
-    
+    %   with basename should be processed as part of the stack.
+
     properties (Hidden, SetAccess = private)
-        folder        
+        folder
         filetype
         count
         iterator
@@ -20,21 +20,21 @@ classdef VirtualImageStack < handle
 
     methods
         function obj = VirtualImageStack(folder, filetype)
-            obj.folder = folder;            
+            obj.folder = folder;
             obj.filetype = filetype;
-            obj.count = 0;            
+            obj.count = 0;
             [~, ~, ~] = mkdir(obj.folder);
         end
-        
+
         function img_name = push(self, img)
         %PUSH Add another image to the stack.
-        
+
             img_name = self.next_name();
             save_location = fullfile(self.folder, img_name);
             imwrite(img, save_location);
             self.count = self.count + 1;
         end
-        
+
         function img_names = push3d(self, img_as_3d)
         %PUSH3D Add a 3D array of images to the stack.
         % Images are assumed to be indexed along the 3rd dimentions.
@@ -42,20 +42,20 @@ classdef VirtualImageStack < handle
         %     stack = VirtualImageStack('my/dir', 'png');
         %     img_as_3d = ones(800, 600, 10);
         %     stack.push3d(img_as_3d);
-        
+
             [~, ~, nz] = size(img_as_3d);
             img_names = cell(nz);
             for img_count = 1:nz
-                img_names{nz} = self.push(img_as_3d(:, :, img_count));                
-            end        
+                img_names{nz} = self.push(img_as_3d(:, :, img_count));
+            end
         end
-        
+
         function movie = movie(self, varargin)
-        %MOVIE Generate an AVI movie from the virtual image stack. 
+        %MOVIE Generate an AVI movie from the virtual image stack.
         %
         %   The first argument is a string specifying the colormap;
         %   defaults to gray.  See COLORMAP for available colormaps.
-        %   
+        %
         %   Example:
         %       fps = 30;
         %       repeat = 5;
@@ -64,25 +64,25 @@ classdef VirtualImageStack < handle
         %       movie(M, repeat, fps);
         %
         %   See also MOVIE.
-                   
+
             if length(varargin) >= 1
                 cmap = varargin{1};
             else
                 cmap = 'gray';
-            end                       
-            
+            end
+
             bitdepth = self.bitdepth();
             cmap_size = 2^bitdepth;
-            cmap = eval([cmap, '(', num2str(cmap_size), ');']);                                                       
-            
+            cmap = eval([cmap, '(', num2str(cmap_size), ');']);
+
             imgs = self.create_iterator();
             movie(imgs.length) = struct('cdata',[],'colormap',[]);
             for i = 1:imgs.length
                 img = imgs.next();
                 movie(i) = im2frame(img, cmap);
-            end            
+            end
         end
-        
+
         function sum = sum(self, mask)
         %SUM Sum all the images in the stack.
         %
@@ -90,24 +90,24 @@ classdef VirtualImageStack < handle
         %
         % There is an optional second argument, which is an array of
         % integers which selects which images to sum over.
-        
-            imgs = self.create_iterator();            
-            
+
+            imgs = self.create_iterator();
+
             if ~exist('mask', 'var')
                 mask = 1:imgs.length;
             end
-            
+
             sum = double(imgs.next());
             img_num = 1;
             while(imgs.more())
                 img = double(imgs.next());
                 if ismember(img_num, mask)
-                    sum = sum + img;                    
-                end                                
+                    sum = sum + img;
+                end
                 img_num = img_num + 1;
-            end                        
+            end
         end
-        
+
         function mean = mean(self, mask)
         %MEAN Mean of the images in the stack.
         %
@@ -121,7 +121,7 @@ classdef VirtualImageStack < handle
             if ~exist('mask', 'var')
                 mask = 1:num_imgs;
             end
-        
+
             sum = self.sum(mask);
             mean = sum/num_imgs;
         end
@@ -133,21 +133,21 @@ classdef VirtualImageStack < handle
         function next(self)
             self.iterator.next();
         end
-        
+
         function iterator = create_iterator(self)
             glob = ['*.', self.filetype];
             iterator = ImageIterator(self.folder, glob);
         end
-        
+
         function bitdepth = bitdepth(self)
             first_img_name = self.create_file_iterator().next();
             info = imfinfo(first_img_name);
             bitdepth = info.BitDepth;
         end
-        
+
         function shape = size(self)
             first_img = self.create_iterator().next();
-            shape = size(first_img);            
+            shape = size(first_img);
         end
 
         function length = length(self)
@@ -157,8 +157,8 @@ classdef VirtualImageStack < handle
 
 
     methods (Access = private)
-        
-        function iterator = create_file_iterator(self)           
+
+        function iterator = create_file_iterator(self)
             glob = ['*.', self.filetype];
             iterator = FileIterator(self.folder, glob);
         end
@@ -167,14 +167,14 @@ classdef VirtualImageStack < handle
             count_as_str = sprintf('%4.4d', self.count);
             img_name = ['img', count_as_str, '.', self.filetype];
         end
-        
+
         function test_img = test_image(self)
             imgs = self.create_iterator();
             if imgs.more()
                 test_img = imgs.next();
             else
                 test_img = [];
-            end            
+            end
         end
 
     end
