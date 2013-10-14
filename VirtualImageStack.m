@@ -5,17 +5,15 @@ classdef VirtualImageStack < handle
     %   same size and have the same bitdepth.
     %
     %   EXAMPLE:
-    %       filetype = 'tiff';
-    %       stack = ImageStack('my/directory', filetype);
+    %       extension = 'tiff';
+    %       stack = ImageStack('my/directory', extension);
     %
-    %   NOTE: The stack assumes that all images in the specified folder starting
-    %   with basename should be processed as part of the stack.
-
+    %   NOTE: The stack assumes that all images in the specified folder with
+    %   the specified extension are in the stack.
     properties (Hidden, SetAccess = private)
         folder
         filetype
         count
-        iterator
     end
 
     methods
@@ -126,14 +124,6 @@ classdef VirtualImageStack < handle
             mean = sum/num_imgs;
         end
 
-        function reset(self)
-            self.iterator = self.create_iterator();
-        end
-
-        function next(self)
-            self.iterator.next();
-        end
-
         function iterator = create_iterator(self)
             glob = ['*.', self.filetype];
             iterator = ImageIterator(self.folder, glob);
@@ -145,6 +135,7 @@ classdef VirtualImageStack < handle
             bitdepth = info.BitDepth;
         end
 
+        % TODO: handle case when stack is empty
         function shape = size(self)
             first_img = self.create_iterator().next();
             shape = size(first_img);
@@ -152,6 +143,16 @@ classdef VirtualImageStack < handle
 
         function length = length(self)
             length = self.create_iterator().length;
+        end
+
+        function clear(self)
+        %CLEAR Delete all images and reset image counter.
+
+            iter = self.create_file_iterator();
+            while(iter.more())
+                delete(iter.next());
+            end
+            self.count = 0;
         end
     end
 
