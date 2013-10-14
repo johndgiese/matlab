@@ -72,9 +72,7 @@ classdef GaussianBlur < ImageFilter
             end
         end
 
-        function size = size(obj)
-            return obj.img_size;
-        end
+    end
 
     methods (Hidden)
         function filtered_img = fft_conv2(obj, img_ft, kernel_ft)
