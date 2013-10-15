@@ -8,27 +8,35 @@ classdef VirtualImageStack < handle
     %       extension = 'tiff';
     %       stack = ImageStack('my/directory', extension);
     %
-    %   NOTE: The stack assumes that all images in the specified folder with
+    %   NOTE: The stack assumes that all images in the specified relpath with
     %   the specified extension are in the stack.
-    properties (Hidden, SetAccess = private)
+    
+    properties (SetAccess = private)
         folder
-        filetype
+        relpath
+    end
+    
+    properties (Hidden, SetAccess = private)
+        filetype        
         count
+        rect
     end
 
     methods
-        function obj = VirtualImageStack(folder, filetype)
-            obj.folder = folder;
+        function obj = VirtualImageStack(relpath, filetype)
+            obj.relpath = relpath;                        
+            obj.folder = lowest_folder_from_path(obj.relpath, filesep);
             obj.filetype = filetype;
             obj.count = 0;
-            [~, ~, ~] = mkdir(obj.folder);
+            %obj.rect = 0; % i.e there is no cropping
+            [~, ~, ~] = mkdir(obj.relpath);
         end
 
         function img_name = push(self, img)
         %PUSH Add another image to the stack.
 
             img_name = self.next_name();
-            save_location = fullfile(self.folder, img_name);
+            save_location = fullfile(self.relpath, img_name);
             imwrite(img, save_location);
             self.count = self.count + 1;
         end
@@ -80,7 +88,20 @@ classdef VirtualImageStack < handle
                 movie(i) = im2frame(img, cmap);
             end
         end
-
+        
+        function crop(self, rect)
+        %CROP Crop out a portion of the images.
+        %
+        % rect is a four-element position vector[xmin ymin width height]
+        % that specifies the size and position of the crop rectangle.
+        %
+        % Doesn't affect the underlying files, only the files that are read
+        % in.  The area is simply a matlab slice
+            self.rect = rect;
+            % TODO: finish implimenting this
+   
+        end
+        
         function sum = sum(self, mask)
         %SUM Sum all the images in the stack.
         %
@@ -126,7 +147,7 @@ classdef VirtualImageStack < handle
 
         function iterator = create_iterator(self)
             glob = ['*.', self.filetype];
-            iterator = ImageIterator(self.folder, glob);
+            iterator = ImageIterator(self.relpath, glob);
         end
 
         function bitdepth = bitdepth(self)
@@ -161,7 +182,7 @@ classdef VirtualImageStack < handle
 
         function iterator = create_file_iterator(self)
             glob = ['*.', self.filetype];
-            iterator = FileIterator(self.folder, glob);
+            iterator = FileIterator(self.relpath, glob);
         end
 
         function img_name = next_name(self)
